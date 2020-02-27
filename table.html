@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title id="titre">Les Halles de l'angoisse</title>
+
+</head>
+
+<body>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+
+        //Variables gobales:
+        var socket;
+        socket = io.connect('http://localhost:8080');
+
+        socket.on('configLoader', function (data) {
+            var paramPrint = "";
+
+            paramPrint += '<div><button style="position: ablsolute; top: 10px; left: 10px;" type="button" onclick="lancerPartie()"> Lancer partie  </button></div>';
+            paramPrint += '<div><input id="parametresPersonnalisées" type="file" style="position: ablsolute; top: 10px; left: 10px;"></div>';
+            paramPrint += '<div><button style="position: ablsolute; top: 10px; left: 10px;" type="button" onclick="persoParamLoader()"> Charger parametres personalisées  </button></div>';
+
+            for (param in data.parameters) {
+                paramPrint += '<div>';
+                paramPrint += '<label style="position: relative; left: 45%; transform: translate(-50%);" for="' + data.parameters[param].nom + '">' + data.parameters[param].nom + '</label>';
+                paramPrint += '</div>';
+                paramPrint += '<div>';
+                paramPrint += '<input style="-webkit-appearance: none; position: relative; left: 50%; transform: translate(-50%); appearance: none; height: 25px; background: #d3d3d3; outline: none; opacity: 0.7; -webkit-transition: .2s; transition: opacity .2s;" id="' + data.parameters[param].id + '" onchange="sliderChange(\'' + data.parameters[param].id + '\')" type="range" min="' + data.parameters[param].numberMin + '" max="' + data.parameters[param].numberMax + '" value="' + data.parameters[param].number + '">';
+                paramPrint += '</div>';
+                paramPrint += '<div>';
+                paramPrint += '<span style="position: relative; left: 50%; transform: translate(-50%);" id="' + data.parameters[param].id + 'prompter">' + data.parameters[param].number + '</span>';
+                paramPrint += '</div>';
+
+            }
+
+            $('body').append(paramPrint);
+
+        });
+
+        var $body = $('body');
+
+
+        /////////////////
+        /////////////////
+        //  Variables  //
+        /////////////////
+        //#region
+
+
+        //Variable Client
+        var pseudo;
+        var message;
+        var width;
+        var height;
+        var indicTour = 0;
+        var Etape = 0;
+        var inventaire = [];
+        var magasin = [];
+        var nbJ = 0;
+        var tmpArr = []; //Tableau réutilisable (toujours vide en dehors des fonctions)
+        var UM = 14;
+        var turnSync = false;
+        var cellDrop;
+        var inventairex;
+        var inventairey;
+        var patternId;
+
+
+        //Variable D3
+        var svgContainer;
+        var playerBank;
+        var playerHand;
+        var playerVotreMain;
+        var playersBoard;
+        var gameBoard;
+        var buttonPass;
+        var testPass;
+        var plateau;
+        var textBoard;
+        var eventTitle;
+        var event;
+        var chatTitle;
+        var chat;
+        var chatInput;
+        var eventHauteur;
+
+        //Variable de drag and drop;
+        var deltaX;
+        var deltaY;
+
+
+
+        //Variable Chat
+        var chatHauteur;
+
+
+        //#endregion
+
+        ////////////////////
+        // Initialisation //
+        ////////////////////
+        //#region
+
+
+        $('document').ready(function () {
+            socket.emit('configLoader', "parameters");
+            width = $(window).width();
+            height = $(window).height();
+
+        });
+
+        function sliderChange(id) {
+            valeur = $('#' + id).val() * 1;
+            $('#' + id + 'prompter').text($('#' + id).val());
+            socket.emit('alterParam', id, "parameters", valeur);
+        }
+
+        function lancerPartie() {
+            socket.emit('lancerPartie', "parameters");
+        }
+
+        socket.on('partieLancée', function () {
+            $body.empty();
+            $('body').attr("style", "margin:0;padding:0;overflow:hidden;word-break: break-all;white-space:normal;");
+            pseudo = prompt("Quel est votre nom ?", "Player");
+            socket.emit('connectionPlayer', pseudo);
+            document.title = pseudo;
+            initScreen();
+            chargementPlateau();
+            socket.emit('partieLancée');
+            inventairex = width * 0.1;
+            inventairey = (height * 0.78);
+        });
+        //#endregion
+
+        /////////////////
+        //  Affichage  //
+        /////////////////
+        //#region
+        function initScreen() {
+
+            // Création de la fenêtre de dessin SVG
+            d3.select("body").append("svg").attr("style", "float:left;").attr("width", width * 0.75).attr("height", height).attr("id", "main");
+            svgContainer = d3.select("svg");
+
+            var defs = svgContainer.append("defs");
+
+
+            //#region
+            
+              ////////////////////
+             //  PatternCases  //
+            ////////////////////
+            defs.append("pattern")
+                .attr("id", "bois")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 2.20)//taille en * taille
+                .attr("width", 3.80)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/bois.jpg");//lien image
+
+            defs.append("pattern")
+                .attr("id", "coin")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("x", 0)
+                .attr("y", -0.08)
+                .attr("height", 1.03)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/coin-stack.png");//lien image
+
+
+            defs.append("pattern")
+                .attr("id", "arrow")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("x", -0.7)
+                .attr("y", -0.01)
+                .attr("height", 1.01)//taille en * taille
+                .attr("width", 3.1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/arrow.jpg");//lien image
+
+
+            defs.append("pattern")
+                .attr("id", "shop1")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/shop1.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "shop2")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/shop2.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "shop3")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/shop3.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "entrance")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/entrance.png");//lien image
+
+
+            defs.append("pattern")
+                .attr("id", "caseEvent1")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/event1.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "caseEvent2")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/event2.png");//lien image
+
+
+            defs.append("pattern")
+                .attr("id", "caseEvent3")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/textures/event3.png");//lien image
+            //#endregion
+
+            //#region
+            
+              ///////////////////////
+             //  PatternMagasins  //
+            ///////////////////////
+            defs.append("pattern")
+                .attr("id", "PatternCaveàvin")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("x", -0.2)
+                .attr("y", 0)
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Caveàvin.png");//lien image
+
+
+            defs.append("pattern")
+                .attr("id", "PatternAlimentationbio")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Alimentationbio.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternBoulangerie")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Boulangerie.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternBoucherie")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Boucherie.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternFruitsetlégumes")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Fruitsetlégumes.png");//lien image
+
+
+            defs.append("pattern")
+                .attr("id", "PatternPoissonnerie")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Poissonnerie.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternFromagerie")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Fromagerie.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternSuperette")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Superette.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternPâtisserie")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Pâtisserie.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternPharmacie")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Pharmacie.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternMultimédia")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Multimédia.png");//lien image
+
+            defs.append("pattern")
+                .attr("id", "PatternDroguerie")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/magasin/Droguerie.png");//lien image
+
+            //#endregion
+
+            //#region
+              /////////////////////
+             //  PatternFemmes  //
+            /////////////////////
+            defs.append("pattern")
+                .attr("id", "PatternFemmesanxieuxpsychorigide.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/anxieuxpsychorigide.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesanxieuxdépressif.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/anxieuxdépressif.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesanxieuxparanoïaque.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/anxieuxparanoïaque.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesanxieuxsociopathe.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/anxieuxsociopathe.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesanxieuxsain.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/anxieuxpsychorigide.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesépicuriendépressif.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/épicuriendépressif.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesépicurienpsychorigide.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/épicurienpsychorigide.png");//lien image
+
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesépicurienparanoïaque.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/épicurienparanoïaque.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesépicuriensociopathe.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/épicuriensociopathe.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesépicuriensain.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/épicuriensain.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmespauvresain.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/pauvresain.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmespauvrepsychorigide.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/pauvrepsychorigide.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmespauvreparanoïaque.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/pauvreparanoïaque.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmespauvredépressif.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/pauvredépressif.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmespauvresociopathe.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/pauvresociopathe.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesvégétariensain.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/végétariensain.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesvégétarienparanoïaque.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/végétarienparanoïaque.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesvégétarienpsychorigide.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/végétarienpsychorigide.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesvégétariensociopathe.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/végétariensociopathe.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFemmesvégétariendépressif.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Femmes/végétariendépressif.png");//lien image
+            //#endregion
+
+            //#region
+              /////////////////////
+             //  PatternHommes  //
+            /////////////////////
+            defs.append("pattern")
+                .attr("id", "PatternHommesanxieuxpsychorigide.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/anxieuxpsychorigide.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesanxieuxdépressif.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/anxieuxdépressif.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesanxieuxparanoïaque.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/anxieuxparanoïaque.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesanxieuxsociopathe.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/anxieuxsociopathe.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesanxieuxsain.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/anxieuxpsychorigide.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesépicuriendépressif.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/épicuriendépressif.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesépicurienpsychorigide.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/épicurienpsychorigide.png");//lien image
+
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesépicurienparanoïaque.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/épicurienparanoïaque.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesépicuriensociopathe.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/épicuriensociopathe.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesépicuriensain.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/épicuriensain.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommespauvresain.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/pauvresain.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommespauvrepsychorigide.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/pauvrepsychorigide.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommespauvreparanoïaque.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/pauvreparanoïaque.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommespauvredépressif.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/pauvredépressif.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommespauvresociopathe.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/pauvresociopathe.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesvégétariensain.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/végétariensain.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesvégétarienparanoïaque.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/végétarienparanoïaque.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesvégétarienpsychorigide.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/végétarienpsychorigide.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesvégétariensociopathe.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/végétariensociopathe.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternHommesvégétariendépressif.png")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/clients/Hommes/végétariendépressif.png");//lien image
+            //#endregion
+
+            //#region
+            //Pattern avis/evenements
+
+            defs.append("pattern")
+                .attr("id", "PatternVoleur")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Voleur.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternAlerte graisse animale !")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Alerte graisse animale !.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternBonjour la villageoise")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Bonjour la villageoise.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternDGCCRF")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/DGCCRF.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternFraude fiscale")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Fraude fiscale.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternLe bio c'est trop tôt !")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Le bio c'est trop tôt !.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternLe cheval de mer")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Le cheval de mer.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternLes fruits fades")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Les fruits fades.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternLes oeufs qui piquent")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Les oeufs qui piquent.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternProvenance inconnue")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Provenance inconnue.png");//lien image
+
+                defs.append("pattern")
+                .attr("id", "PatternPénurie de raclette")//id à utiliser dans avec ("fill","url(#test)");
+                .attr("height", "100%")//% de l'image utiliser pour la texture
+                .attr("width", "100%")
+                .attr("patternContentUnits", "objectBoundingBox")//definit le systeme de coordonner (x,y,height,weight)
+                .append("image")
+                .attr("height", 1)//taille en * taille
+                .attr("width", 1)
+                .attr("xmlns:xlink", "https://www.w3.org/1999/xlink")//permet d'importer du local avec xlink
+                .attr("xlink:href", "./public/cartes/avis-evenement/Pénurie de raclette.png");//lien image
+            //#endregion
+
+            // Rectangle contenant l'argent du joueur
+            svgContainer.append("g").attr("width", width * 0.05).attr("height", height * 0.3).attr("x", width * 0).attr("y", height * 0.75).attr("id", "playerBank");
+            playerBank = d3.select("#playerBank");
+            playerBank.append("rect").attr("width", width * 0.05).attr("height", height * 0.3).attr("x", width * 0).attr("y", height * 0.75).attr("fill", "url(#coin)");
+            playerBank.insert("text", "#playerBank").attr("x", width * 0.014).attr("y", height * 0.97).attr("font-size", "200%").attr("fill", "white").text(UM).attr("id", "currentMoney");
+
+            // Indicateur du tour => Jaune si c'est a votre tour bleu sinon
+            svgContainer.append('rect')
+                .attr("width", width * 0.05)
+                .attr("height", height * 0.3)
+                .attr("x", width * 0)
+                .attr("y", height * 0.47)
+                .attr("style", "fill:lightgrey")
+                .attr("id", "turnIndicator");
+
+            // Rectangle contenant les cartes du joueurs
+            svgContainer.append("rect").attr("width", width * 0.70).attr("height", height * 0.3).attr("x", width * 0.05).attr("y", height * 0.7).attr("id", "playerHand").attr("fill", "url(#bois)");
+            playerHand = d3.select("#playerHand");
+
+            svgContainer.append("g").attr("id", "playerVotreMain").attr("width", width * 0.15).attr("height", height * 0.05).attr("x", width * 0.05).attr("y", height * 0.7);
+            playerVotreMain = d3.select("#playerVotreMain");
+            playerVotreMain.append("rect").attr("width", width * 0.15).attr("height", height * 0.05).attr("x", width * 0.05).attr("y", height * 0.7).attr("style", "fill:grey");
+            playerVotreMain.insert("text", "#playerVotreMain").attr("x", width * 0.08).attr("y", height * 0.73).attr("font-size", "130%").text("Votre Main");
+
+            // Rectangle qui permettra de passer les phases de jeu
+            svgContainer.append("rect").attr("width", width * 0.05).attr("height", height * 0.3).attr("x", width * 0.70).attr("y", height * 0.7).attr("id", "buttonPass").attr("fill", "url(#arrow)");
+            buttonPass = d3.select("#buttonPass");
+            $("#buttonPass").attr("type", "button").attr("onclick", "newTurn()");
+
+
+
+            // Rectangle contenant | le tour actuel de jeu | nombre de cartes restantes | autres données importante du jeu
+            svgContainer.append("g").attr("id", "gameBoard").attr("width", width * 0.15).attr("height", height * 0.07).attr("x", 0).attr("y", 0);
+            gameBoard = d3.select("#gameBoard");
+            gameBoard.append("rect").attr("width", width * 0.15).attr("height", height * 0.07).attr("x", 0).attr("y", 0).attr("style", "fill:grey");
+            gameBoard.insert("text", "#gameBoard").attr("x", 1).attr("y", 15).attr("font-size", "100%").text("Tour n°0").attr("id", "nbtour");
+
+            // Rectangle contenant | pseudo joueurs connectés | argent joueurs connectés | token qui dit qui est en train de jouer
+            playersBoard = svgContainer.append("g").attr("id", "#playersBoard").attr("width", width * 0.15).attr("height", height * 0.63).attr("x", 0).attr("y", height * 0.07);
+            playersBoard.append("rect").attr("width", width * 0.15).attr("height", height * 0.63).attr("x", 0).attr("y", height * 0.07).attr("id", "rect_playersBoard").attr("style", "fill:#333333");
+
+            // Rectangle contenant le plateau de jeu
+            svgContainer.append("rect").attr("width", width * 0.6).attr("height", height * 0.7).attr("x", width * 0.15).attr("y", 0).attr("id", "plateau").attr("style", "fill:darkblue");
+            plateau = d3.select("#plateau");
+
+
+
+            // Création des fenêtres événement et chat
+            $('#main').after("<div id=\"Textboard\" style=\"width:" + width * 0.25 + "%;height:" + height + "px;\"></div>");
+            textBoard = d3.select("#Textboard");
+
+            $('#Textboard').append("<div id=\"eventTitle\" style=\"text-align: center;font-size: " + height * 0.05 + "px;background-color:grey;width:" + width + "px;height:" + height * 0.05 + "px;\">Event</div>");
+            eventTitle = d3.select("#eventTitle");
+
+            $('#Textboard').append("<div id=\"event\" style=\"font-size: " + height * 0.022 + "px;background-color:#123456;width:" + width + "px;height:" + height * 0.3 + "px;color:#e3e8ef;\"></div>");
+            event = d3.select("#event");
+
+            $('#Textboard').append("<div id=\"chatTitle\" style=\"text-align: center;font-size: " + height * 0.05 + "px;background-color:grey;width:" + width + "px;height:" + height * 0.05 + "px;\">Chat</div>");
+            chatTitle = d3.select("#chatTitle");
+
+            $('#Textboard').append("<div id=\"chat\" style=\"overflow:ininherit;overflow-y:scroll;font-size: " + height * 0.022 + "px;background-color:#123456;width:" + width * 0.25 + "px;height:" + height * 0.5 + "px;color:#e3e8ef;\"></div>");
+            chat = d3.select("#chat");
+
+            $('#Textboard').append("<textarea type=\"text\" name=\"chatInput\" id=\"chatInput\" style=\"font-size: " + height * 0.022 + "px;height:" + height * 0.1 + "px;width:" + width * 0.25 + "px;resize:none;\" placeholder=\"Press Enter to Send a message\"></textarea>");
+            chatInput = d3.select("#chatInput");
+
+            $('#chatInput').keypress(function (event) {
+                if (event.keyCode == 13) { event.preventDefault(); message = $('#chatInput').val(); $('#chatInput').val('').focus(); chatManagement(); }
+            });
+            eventHauteur = $('#event').height();
+            chatHauteur = $('#chat').height();
+        }
+
+        // Trigger en cas de Resize de fenêtre par le client
+        $(window).resize(function () {
+            width = $(window).width();
+            height = $(window).height();
+            resizeScreen();
+        });
+
+        // Cette fonction resize tout les éléments de la table de jeu
+        function resizeScreen() {
+            svgContainer.attr("width", width * 0.75).attr("height", height);
+            playerBank.attr("width", width * 0.05).attr("height", height * 0.3).attr("x", width * 0).attr("y", height * 0.7);
+            playerHand.attr("width", width * 0.70).attr("height", height * 0.3).attr("x", width * 0.05).attr("y", height * 0.7);
+            playerVotreMain.attr("width", width * 0.15).attr("height", height * 0.05).attr("x", width * 0.05).attr("y", height * 0.7);
+            gameBoard.attr("width", width * 0.15).attr("height", height * 0.07).attr("x", 0).attr("y", 0);
+            playersBoard.attr("width", width * 0.15).attr("height", height * 0.63).attr("x", 0).attr("y", height * 0.07);
+            buttonPass.attr("width", width * 0.05).attr("height", height * 0.3).attr("x", width * 0.70).attr("y", height * 0.7);
+            plateau.attr("width", width * 0.6).attr("height", height * 0.7).attr("x", width * 0.15).attr("y", 0);
+            textBoard.attr("width", width * 0.25).attr("height", height);
+            eventTitle.attr("style", "text-align: center;font-size: " + height * 0.05 + "px;background-color:grey;width:" + width + "px;height:" + height * 0.05 + "px");
+            event.attr("style", "font-size: " + height * 0.022 + "px;background-color:#123456;width:" + width + "px;height:" + height * 0.3 + "px;");
+            chatTitle.attr("style", "text-align: center;font-size: " + height * 0.05 + "px;background-color:grey;width:" + width + "px;height:" + height * 0.05 + "px");
+            chat.attr("style", "font-size: " + height * 0.022 + "px;background-color:#123456;width:" + width + "px;height:" + height * 0.5 + "px");
+            chatInput.attr("style", "font-size: " + height * 0.022 + "px;height:" + height * 0.1 + "px;width:" + width * 0.25 + "px;resize:none;");
+        }
+        //#endregion
+
+
+        function pointInRectangle(point, rect) {
+            if (point.x >= rect.attr("x") &&
+                point.x <= parseFloat(rect.attr("x")) + parseFloat(rect.attr("width")) &&
+                point.y >= rect.attr("y") &&
+                point.y <= parseFloat(rect.attr("y")) + parseFloat(rect.attr("height"))) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+
+        function dragstarted() {
+            var current = d3.select(this);
+            initialX = current.attr("x");
+            initialY = current.attr("y");
+            deltaX = current.attr("x") - d3.event.x;
+            deltaY = current.attr("y") - d3.event.y;
+            d3.select(this).raise().classed("active", true);
+        }
+
+        function dragged() {
+            d3.select(this).attr("x", d3.event.x + deltaX).attr("y", d3.event.y + deltaY);
+        }
+
+        function selectMag(client, magCoord) {
+            let regex2 = /[^xy=]/g;
+            let coord = magCoord.match(regex2);
+            let x = coord[0];
+            let y = coord[1];
+
+            socket.emit("actualiser", {
+                "x": x,
+                "y": y,
+                "client": client
+            });
+        }
+
+        function deplacementClient(x, y, id) {
+            let iRand = Math.floor(Math.random() * Math.floor(4)) + 1;
+            let xRand;
+            if (x > 4) {
+                xRand = x - iRand + 1;
+            }
+            else {
+                xRand = x + iRand - 1;
+            }
+            console.log(iRand);
+            var cells = d3.selectAll(".cell").nodes()
+            for (var i = 0; i < cells.length; i++) {
+                if (d3.select(cells[i]).attr("id") == ("x=" + xRand + "y=2")) {
+                    //Ici Josua
+                    d3.select(cells[i]).attr("style", "fill:green").attr("onclick", "selectMag(\'" + id + "\',\'" + d3.select(cells[i]).attr("id") + "\')");
+                }
+                if (d3.select(cells[i]).attr("id") == ("x=" + xRand + "y=0")) {
+                    //Ici Josua
+                    d3.select(cells[i]).attr("style", "fill:green").attr("onclick", "selectMag(\'" + id + "\',\'" + d3.select(cells[i]).attr("id") + "\')");
+                }
+            }
+            $(".cell-type-entrée").attr("onclick", null);
+        }
+
+
+        function dragended() {
+            var final = d3.select(this);
+            var cells = d3.selectAll(".cell").nodes() // selectionne tous les éléments avec la classe cellule
+            var cardType = final.attr("class").match(/[\S]*/g)[0];
+            var cellTarget;
+            console.log(cardType);
+            for (var i = 0; i < cells.length; i++) {
+                var cellType1 = d3.select(cells[i]).attr("class").match(/type-[magasin]*/)[0]
+                var cellType2 = d3.select(cells[i]).attr("class").match(/type-[affichage]*/)[0]
+                var cellType3 = d3.select(cells[i]).attr("class").match(/type-[\w-é.]*/)[0]
+                console.log(cellType3);
+                if (cellType1 == cardType || cellType2 == cardType || cellType3 == cardType) {
+                    var collision = false;
+
+                    collision = pointInRectangle({ x: final.attr("x"), y: final.attr("y") }, d3.select(cells[i]));
+                    collision = pointInRectangle({ x: parseFloat(final.attr("x")) + parseFloat(final.attr("width")), y: final.attr("y") }, d3.select(cells[i]));
+                    collision = pointInRectangle({ x: final.attr("x"), y: parseFloat(final.attr("y")) + parseFloat(final.attr("height")) }, d3.select(cells[i]));
+                    collision = pointInRectangle({ x: parseFloat(final.attr("x")) + parseFloat(final.attr("width")), y: parseFloat(final.attr("y")) + parseFloat(final.attr("height")) }, d3.select(cells[i]));
+                    if (collision) {
+                        cellTarget = true;
+                        cellDrop = cells[i];
+                        socket.emit('actualiser', {
+                            "coord": d3.select(cellDrop).attr("id"),
+                            "id": final.attr("id")
+                        });
+                        inventairex = (inventairex - (width * 0.05));
+                        //Afficher la texture sur la case 
+                        //Ici Josua
+                        console.log("tour : "+indicTour)
+                        if(indicTour == 2){
+                        d3.select(cellDrop).attr("fill", "url(#Pattern" + final.attr("id").match(/[^_]*/g)[0] + ")");
+                        } else if (indicTour == 3){
+                        d3.select(cellDrop).attr("fill", "url(#Pattern" + final.attr("id").match(/[^_]*/g)[0] + ")");
+                        }else if (indicTour == 4){
+                        d3.select(cellDrop).attr("fill", "url(#Pattern" + patternId[patternId.length-2] +patternId[patternId.length-1] +")");
+                        }
+                        if ((/type-[entr]/).test(final.attr("class"))) {
+                            let regex2 = /[^xy=]/g;
+                            let coord = d3.select(cellDrop).attr("id").match(regex2);
+                            let x = coord[0];
+                            let y = coord[1]; let indexNom;
+                            for (let i = 0; i < inventaire[3]["clients"].length; i++) {
+                                if (inventaire[3]["clients"][i].nom == final.attr("id")) {
+                                    indexNom = i;
+                                }
+                            }
+                            d3.select(cellDrop).attr("onclick", "deplacementClient(\'" + x + "\',\'" + y + "\',\'" + indexNom + "\')");
+                        }
+                    }
+                }
+            }
+            if (cellTarget) {
+                d3.select(this).classed("active", false);
+                final.remove();
+            }
+            else {
+                d3.select(this).attr("x", initialX);
+                d3.select(this).attr("y", initialY);
+            }
+        }
+
+        ////////////
+        //  Chat  //
+        ////////////
+        //#region
+
+
+        socket.on("messageServer", function (data) {
+            ajoutMessage(data.nomClient, data.message);
+            chatHauteur += 20;
+            $('#chat').scrollTop(chatHauteur);
+        });
+
+        function chatManagement() {
+            socket.emit('messageClient', pseudo, message);
+        }
+
+        function ajoutMessage(pseudo, message) {
+            $('#chat').append('<div><strong>' + pseudo + '</strong> : ' + message + '</div>');
+        }
+
+        //#endregion
+
+        /////////////
+        //  Event  //
+        /////////////
+        //#region
+
+
+        socket.on("eventServer", function (data) {
+            ajoutEvent(data);
+            eventHauteur += 20;
+            $('#event').scrollTop(eventHauteur);
+        });
+
+
+        function ajoutEvent(data) {
+            $('#event').append('<div>' + data + '</div>');
+        }
+
+        //#endregion
+
+        //////////////////
+        //  Connexions  //
+        //////////////////
+        //#region
+
+        socket.on('connectionPlayer', function (nbJoueurs, pseudoArr) {
+
+            displayConnection(pseudoArr, nbJoueurs - 1);
+
+        });
+
+        socket.on('toLast', function (nbJoueurs, pseudoArr) {
+
+            displayConnection(pseudoArr, nbJoueurs - 1);
+
+        });
+
+        socket.on('disconnectionPlayer', function (pseudoArr, nbJoueurs) {
+
+            displayConnection(pseudoArr, nbJoueurs - 1);
+
+        });
+
+
+        //#endregion
+
+        /////////////////////
+        // Fonctionnalité  //
+        /////////////////////
+        //#region
+        //Fonction affichant les rectangles ou se trouve les pseudos des autres joueurs
+
+        function displayConnection(pseudoArr, nbJoueurs) {
+            nbJ = nbJoueurs;
+            playersBoard.html(null);
+            playersBoard.append("rect").attr("width", width * 0.15).attr("height", height * 0.63).attr("x", 0).attr("y", height * 0.07).attr("id", "rect_playersBoard").attr("fill", "url(#bois)");
+            let y = (height * 0.07) / nbJoueurs;
+            pseudoArr.forEach(element => {
+                if (element != pseudo) {
+                    playersBoard.insert("rect", "#playersBoard").attr("width", width * 0.15).attr("height", ((height * 0.63) / (nbJoueurs)))
+                        .attr("x", 0).attr("y", y).attr("id", element + "_rect").attr("style", "fill:lightgreen;fill-opacity:0.3;");
+                    playersBoard.append("text").attr("x", 0).attr("y", y + 20).text(element);
+                    y = y + (height * 0.63) / nbJoueurs;
+                }
+
+            });
+        }
+        function chargementPlateau() {
+            socket.emit('chargementPlateau');
+        }
+
+        socket.on('chargementPlateau', function (data) {
+
+            let nombreCaseLargeur = data.largeur * 1.0;
+            let nombreCaseHauteur = data.hauteur * 1.0;
+            $('#plateau').remove();
+            var plat = svgContainer.append("g")
+                .attr("id", "plateau")
+
+            for (let i = 0; i < nombreCaseLargeur; i++) {
+                for (let j = 0; j < nombreCaseHauteur; j++) {
+                    var tmp = plat.append("rect")
+                        .attr("width", (width * 0.6) / nombreCaseLargeur - 0.5)
+                        .attr("height", (height * 0.7) / nombreCaseHauteur - 0.5)
+                        .attr("x", (width * 0.15) + (i * ((width * 0.6) / nombreCaseLargeur)))
+                        .attr("y", 0 + (j * ((height * 0.7) / nombreCaseHauteur)))
+                        .attr("id", "x=" + i + "y=" + j);
+                    for (let v = 0; v < data.plateau.length; v++) {
+                        if (data.plateau[v]["emplacement"][0].x == i
+                            && data.plateau[v]["emplacement"][0].y == j) {
+                            tmp.attr("class", "cell cell-type-" + data.plateau[v]["type"]); $
+                            if (data.plateau[v]["type"] == "magasin") {
+                                if (data.plateau[v]["n"] != null) {  //ici Josua
+                                    tmp.attr("fill", "/public/textures/" + data.plateau[v]["n"] + ".png");
+                                    //.attr("onmouseover","displayStat()");
+                                    //.attr("onmouseout",);
+                                } else if (i == 0 || i == 1) {
+                                    tmp.attr("fill", "url(#shop1)");
+                                } else if (i == 2 || i == 3) {
+                                    tmp.attr("fill", "url(#shop2)");
+                                } else if (i == 4 || i == 5) {
+                                    tmp.attr("fill", "url(#shop3)");
+                                }
+                            }
+                            if (data.plateau[v]["type"] == "affichage") {
+                                if (data.plateau[v]["n"] != null) {  //ici Josua
+                                    tmp.attr("fill", "/public/textures/" + data.plateau[v]["n"] + ".png");
+                                    //.attr("onmouseover","displayStat()");
+                                    //.attr("onmouseout",);
+                                } else if (i == 0 || i == 1) {
+                                    tmp.attr("fill", "url(#caseEvent1)");
+                                } else if (i == 2 || i == 3) {
+                                    tmp.attr("fill", "url(#caseEvent2)");
+                                } else if (i == 4 || i == 5) {
+                                    tmp.attr("fill", "url(#caseEvent3)");
+                                }
+                            }
+                            if (data.plateau[v]["type"] == "entrée") {
+                                tmp.attr("fill", "url(#entrance)");
+                            }
+                            if (data.plateau[v]["type"] == "couloir") {
+                                tmp.attr("style", "fill:#ACFEA9");
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        //Fonction qui afficherea les elements de l'inventaire
+        function displayInventory(array, type, image) {
+            if (indicTour < 2) {
+                inventairex = width * 0.07;
+                array.forEach(element => {
+                    console.log(element)
+                    svgContainer.insert("image", "#main")
+                        .attr("width", (width * 0.08))
+                        .attr("height", (height * 0.2))
+
+                        .attr("id", d3.select(element).attr("id") + "_" + pseudo)
+                        .attr("x", inventairex)
+                        .attr("y", inventairey)
+                        .attr("xlink:href", "./public/cartes/magasin/" + d3.select(element).attr("id") + ".png")
+                        .attr("class", "type-" + type);
+                    // .attr('onmouseover','displayStat()'):
+                    //.attr("onmouseout",);
+                    inventairex = (inventairex + (width * 0.05));
+                });
+            } else {
+                array.forEach(element => {
+                    console.log(element);
+                    svgContainer.insert("image", "#main")
+                        .attr("width", (width * 0.08))
+                        .attr("height", (height * 0.2))
+                        .attr("id", element.Nom + "_" + pseudo)
+                        .attr("x", inventairex)
+                        .attr("y", inventairey)
+                        .attr("xlink:href", element.imgPath)
+                        .attr("class", "type-" + type);
+                    // .attr('onmouseover','displayStat()'):
+                    //.attr("onmouseout",);
+                    inventairex = (inventairex + (width * 0.05));
+                });
+            }
+        }
+
+        function takeCard(target, cout, image) {
+            if (UM - cout < 0) {
+                alert("Vous n'avez pas assez d'argent");
+            }
+            else {
+                UM -= cout;
+                currentMoney.remove();
+                playerBank.insert("text", "#playerBank").attr("x", width * 0.014).attr("y", height * 0.97).attr("font-size", "200%").attr("fill", "lightgrey").text(UM).attr("id", "currentMoney");
+                console.log(target)
+                console.log(typeof target.id)
+                // console.log(target.id.toString())
+                socket.emit("actualiser", target.id);
+                inventaire.push(target);
+                $(".type-magasin").remove();
+                console.log(inventaire);
+                displayInventory(inventaire, "magasin", null);
+                // d3.select(target).attr("id", null);
+                target.remove();
+                $('#buttonPass').attr('onclick', 'finTour()');
+            }
+        }
+
+
+        //Fonction principale de gestion des etapes du tour de jeu 
+        function newTurn() {
+            if (indicTour == 0) {
+                alert("Phase achat");
+                let i = 0;
+                max = magasin.length;
+                mid = Math.ceil(max / 2);
+                let x = (width * 0.2);
+                let y = (height * 0.15);
+                svgContainer.insert("g", "#main").attr("id", "mag");
+                magasin.forEach(element => {
+                    if (i == mid) {
+                        x = width * 0.2;
+                        y = y + width * 0.15;
+                    }
+                    var nom = element.nom;
+                    let tmp =
+                        d3.select("#mag").append("image")
+                            .attr("xlink:href", element.image)
+                            .attr("width", (width * 0.08))
+                            .attr("height", (height * 0.2))
+                            .attr("x", x)
+                            .attr("y", y)
+                            .attr("id", nom)
+                            .attr("onclick", "takeCard(" + nom + "," + element.coût + ", \"" + element.image + "\")");
+                    x = x + width * 1 / max;
+                    tmpArr[i] = tmp.attr("id");
+                    i++;
+                });
+            }
+            if (indicTour == 1) {   //Phase de placement des magasins
+                alert("Posez vos magasins");
+                d3.selectAll(".type-magasin").call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+            }
+
+            if (indicTour == 2) { //Phase Evenements / Avis
+                //TODO:Trouver comment gérér les cartes événements
+                alert("Phase évenements/avis");
+                $(".type-affichage").remove();
+                console.log(inventaire[1]["event"].Nom)
+
+                displayInventory(inventaire[1]["event"], "affichage");
+                displayInventory(inventaire[2]["avis"], "affichage");
+                d3.selectAll(".type-affichage").call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+            }
+
+            if (indicTour == 3) { //Phase clients
+                alert("Phase clients");
+                inventaire[3]["clients"].forEach(element => {
+                    console.log(element);
+                    svgContainer.insert("svg:image", "#main")
+                        .attr("xlink:href", element["imgPath"])
+                        .attr("id", element.nom)
+                        .attr("width", (width * 0.08))
+                        .attr("height", (height * 0.2))
+                        .attr("x", inventairex)
+                        .attr("y", inventairey)
+                        .attr("class", "type-entrée");
+                    inventairex = (inventairex + (width * 0.05));
+                    patternId = element.imgPath.split("/");
+                    console.log(patternId);
+
+                });
+
+                d3.selectAll(".type-entrée").call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+            }
+            if (indicTour == 4) { //Phase de résolution
+                //Chargement du Plateau 
+            }
+
+            if (++indicTour > 4) { //nombre max d'etape
+                indicTour = 2; //On revient sur la phase event/avis 
+            }
+            nbtour.remove();
+            gameBoard.insert("text", "#gameBoard").attr("x", 1).attr("y", 15).attr("font-size", "100%").text("Tour n°" + indicTour).attr("id", "nbtour");
+            $('#buttonPass').attr('onclick', 'finTour()');
+        }
+
+        //#endregion
+
+
+
+        /////////////////////
+        //   Tour de jeu   //
+        /////////////////////
+        //#region
+
+        socket.on('blocage', function () {
+            turnSync = false;
+            $("#buttonPass").attr("onclick", null);
+            console.log("pas votre tour");
+            socket.emit("bloque");
+        });
+
+        socket.on('initTurn', function () {
+            if (!turnSync) {
+                turnSync = true;
+                socket.emit('playerTurn');
+            }
+        });
+
+        socket.on('yourTurn', function (data) {
+            console.log("C'est votre tour");
+
+            if (indicTour == 0) {
+                console.log(data);
+                magasin = data;
+            }
+
+            if (indicTour > 1 && indicTour < 4) {
+                inventaire = data;
+                if ((inventaire[0]["magasins"].length +
+                    inventaire[1]["event"].length + inventaire[2]["avis"].length
+                    + inventaire[3]["clients"].length) >= 14) {
+                    alert("Vous avez trop de cartes! Pas de nouvelles pour vous");
+                    inventairex = width * 0.1;
+                    inventairey = (height * 0.78);
+                }
+            }
+            if (indicTour == 4) {
+                console.log("data=" + data);
+                UM = data;
+            }
+            console.log("Nous sommes a l'étape: " + indicTour);
+            $('#turnIndicator').attr('style', 'fill:yellow'); //Ou lui mettre une image
+            newTurn();
+            $("#buttonPass").attr("onclick", "finTour()");
+        });
+
+        function finTour() {
+            if (indicTour == 1) {
+                $('#mag').remove();
+            }
+            for (let i = 0; i < tmpArr.length; i++) {
+                $("#" + tmpArr[i]).remove();
+            }
+            tmpArr.length = 0;
+
+            $("#turnIndicator").attr("style", "fill:lightgrey");
+            socket.emit("finTour");
+        }
+        //Si une partie se finie, on raffiche la page de configuration de la partie
+        socket.on('finPartie', function () {
+            alert("fin de la partie");
+            //Retour aux configs
+        });
+//#endregion
+
+    </script>
+</body>
+
+
+</html>

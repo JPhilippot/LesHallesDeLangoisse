@@ -1,0 +1,428 @@
+{
+    "nom": "standard",
+    "width": 7,
+    "height": 3,
+    "parameters": [
+        {
+            "nom": "Nombre de joueurs",
+            "number": 4,
+            "numberMin": 2,
+            "numberMax": 5
+        },
+        {
+            "nom": "Largeur de la Carte",
+            "number": 4,
+            "numberMin": 2,
+            "numberMax": 5
+        },
+        {
+            "nom": "Hauteur de la Carte",
+            "number": 4,
+            "numberMin": 2,
+            "numberMax": 5
+        },
+        {
+            "nom": "Nombre de clients épicuriens",
+            "number": 10,
+            "numberMin": 5,
+            "numberMax": 10
+        },
+        {
+            "nom": "Nombre de clients paranoïaques parmis les épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients sociopathes parmis les épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients psychorigides parmis les épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients dépressifs parmis les épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de client végétariens",
+            "number": 10,
+            "numberMin": 5,
+            "numberMax": 10
+        },
+        {
+            "nom": "Nombre de clients paranoïaques parmis les végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients sociopathes parmis les végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients psychorigides parmis les végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients dépressifs parmis les végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de client pauvres",
+            "number": 20,
+            "numberMin": 10,
+            "numberMax": 20
+        },
+        {
+            "nom": "Nombre de clients paranoïaques parmis les pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients sociopathes parmis les pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients psychorigides parmis les pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients dépressifs parmis les pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de client anxieux",
+            "number": 1,
+            "numberMin": 5,
+            "numberMax": 10
+        },
+        {
+            "nom": "Nombre de clients paranoïaques parmis les anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients sociopathes parmis les anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients psychorigides parmis les anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Nombre de clients dépressifs parmis les anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Cave à Vin",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Alimentation bio",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Boulangerie",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Boucherie",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Fruits et légumes",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Poissonnerie",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Supérette",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Fromagerie",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Pâtisserie",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "nom": "Magasin Pharmacie",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        }
+    ],
+    "magasins": [
+        {
+            "nom": "Cave à vin",
+            "prix": 8,
+            "x": 2,
+            "y": 1
+        },
+        {
+            "nom": "Alimentation bio",
+            "prix": 8,
+            "x": 3,
+            "y": 1
+        },
+        {
+            "nom": "Boulangerie",
+            "prix": 6,
+            "x": 6,
+            "y": 1
+        },
+        {
+            "nom": "Boucherie",
+            "prix": 8,
+            "x": 7,
+            "y": 1
+        },
+        {
+            "nom": "Fruits et légumes",
+            "prix": 8,
+            "x": 1,
+            "y": 3
+        },
+        {
+            "nom": "Poissonnerie",
+            "prix": 8,
+            "x": 2,
+            "y": 3
+        },
+        {
+            "nom": "Supérette",
+            "prix": 10,
+            "x": 3,
+            "y": 3
+        },
+        {
+            "nom": "Fromagerie",
+            "prix": 8,
+            "x": 5,
+            "y": 3
+        },
+        {
+            "nom": "Pâtisserie",
+            "prix": 8,
+            "x": 6,
+            "y": 3
+        },
+        {
+            "nom": "Pharmacie",
+            "prix": 10,
+            "x": 5,
+            "y": 1
+        }
+    ],
+    "avis": [
+        {
+            "nom": "avis1",
+            "x": 1,
+            "y": 1
+        },
+        {
+            "nom": "avis2",
+            "x": 4,
+            "y": 1
+        },
+        {
+            "nom": "avis3",
+            "x": 7,
+            "y": 3
+        }
+    ],
+    "lanes": [
+        {
+            "x": 2,
+            "y": 2
+        },
+        {
+            "x": 2,
+            "y": 3
+        },
+        {
+            "x": 2,
+            "y": 4
+        },
+        {
+            "x": 2,
+            "y": 5
+        },
+        {
+            "x": 2,
+            "y": 6
+        }
+    ],
+    "entrées": [
+        {
+            "nom": "entrée1",
+            "x": 1,
+            "y": 2
+        },
+        {
+            "nom": "entrée2",
+            "x": 7,
+            "y": 2
+        },
+        {
+            "nom": "entrée3",
+            "x": 4,
+            "y": 3
+        }
+    ],
+    "zones": [
+        {
+            "nom": "zone1",
+            "color": "#990999",
+            "cases": [
+                {
+                    "x": 1,
+                    "y": 1
+                },
+                {
+                    "x": 2,
+                    "y": 1
+                },
+                {
+                    "x": 1,
+                    "y": 2
+                },
+                {
+                    "x": 2,
+                    "y": 2
+                },
+                {
+                    "x": 1,
+                    "y": 3
+                },
+                {
+                    "x": 2,
+                    "y": 3
+                }
+            ]
+        },
+        {
+            "nom": "zone2",
+            "color": "#009900",
+            "cases": [
+                {
+                    "x": 3,
+                    "y": 1
+                },
+                {
+                    "x": 4,
+                    "y": 1
+                },
+                {
+                    "x": 5,
+                    "y": 1
+                },
+                {
+                    "x": 3,
+                    "y": 2
+                },
+                {
+                    "x": 4,
+                    "y": 2
+                },
+                {
+                    "x": 5,
+                    "y": 2
+                },
+                {
+                    "x": 3,
+                    "y": 3
+                },
+                {
+                    "x": 4,
+                    "y": 3
+                },
+                {
+                    "x": 5,
+                    "y": 3
+                }
+            ]
+        },
+        {
+            "nom": "zone3",
+            "color": "#000099",
+            "cases": [
+                {
+                    "x": 6,
+                    "y": 1
+                },
+                {
+                    "x": 7,
+                    "y": 1
+                },
+                {
+                    "x": 6,
+                    "y": 2
+                },
+                {
+                    "x": 7,
+                    "y": 2
+                },
+                {
+                    "x": 6,
+                    "y": 3
+                },
+                {
+                    "x": 7,
+                    "y": 3
+                }
+            ]
+        }
+    ],
+    "clients": []
+}

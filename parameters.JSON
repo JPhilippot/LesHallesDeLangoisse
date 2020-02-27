@@ -1,0 +1,676 @@
+{
+    "parameters": [
+        {
+            "id": "param1",
+            "nom": "Nombre de joueurs",
+            "number": 4,
+            "numberMin": 2,
+            "numberMax": 5
+        },
+        {
+            "id": "param2",
+            "nom": "Largeur de la Carte",
+            "number": 6,
+            "numberMin": 6,
+            "numberMax": 6
+        },
+        {
+            "id": "param3",
+            "nom": "Hauteur de la Carte",
+            "number": 3,
+            "numberMin": 3,
+            "numberMax": 3
+        },
+        {
+            "id": "param4",
+            "nom": "Nombre de zones",
+            "number": 3,
+            "numberMin": 1,
+            "numberMax": 3
+        },
+        {
+            "id": "param5",
+            "nom": "Nombre d'entrées",
+            "number": 2,
+            "numberMin": 2,
+            "numberMax": 2
+        },
+        {
+            "id": "param6",
+            "nom": "Nombre de clients épicuriens sains",
+            "number": 10,
+            "numberMin": 5,
+            "numberMax": 10
+        },
+        {
+            "id": "param7",
+            "nom": "Nombre de clients paranoïaques parmis les épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param8",
+            "nom": "Nombre de clients sociopathes parmis les épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param9",
+            "nom": "Nombre de clients psychorigides parmis les épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param10",
+            "nom": "Nombre de clients dépressifs parmis les épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param11",
+            "nom": "Nombre de client végétariens sains",
+            "number": 10,
+            "numberMin": 5,
+            "numberMax": 10
+        },
+        {
+            "id": "param12",
+            "nom": "Nombre de clients paranoïaques parmis les végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param13",
+            "nom": "Nombre de clients sociopathes parmis les végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param14",
+            "nom": "Nombre de clients psychorigides parmis les végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param15",
+            "nom": "Nombre de clients dépressifs parmis les végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param16",
+            "nom": "Nombre de client pauvres sains",
+            "number": 20,
+            "numberMin": 10,
+            "numberMax": 20
+        },
+        {
+            "id": "param17",
+            "nom": "Nombre de clients paranoïaques parmis les pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param18",
+            "nom": "Nombre de clients sociopathes parmis les pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param19",
+            "nom": "Nombre de clients psychorigides parmis les pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param20",
+            "nom": "Nombre de clients dépressifs parmis les pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param21",
+            "nom": "Nombre de client anxieux sains",
+            "number": 1,
+            "numberMin": 5,
+            "numberMax": 10
+        },
+        {
+            "id": "param22",
+            "nom": "Nombre de clients paranoïaques parmis les anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param23",
+            "nom": "Nombre de clients sociopathes parmis les anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param24",
+            "nom": "Nombre de clients psychorigides parmis les anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param25",
+            "nom": "Nombre de clients dépressifs parmis les anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 2
+        },
+        {
+            "id": "param40",
+            "nom": "Nombre de carte évènements type voleur",
+            "number": 4,
+            "numberMin": 2,
+            "numberMax": 8
+        },
+        {
+            "id": "param41",
+            "nom": "Nombre de carte évènements type fraude fiscale",
+            "number": 3,
+            "numberMin": 2,
+            "numberMax": 6
+        },
+        {
+            "id": "param42",
+            "nom": "Nombre de carte évènements type DGCCRF",
+            "number": 4,
+            "numberMin": 2,
+            "numberMax": 8
+        },
+        {
+            "id": "param43",
+            "nom": "Nombre de carte avis type Anxieux/Épicuriens",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 4
+        },
+        {
+            "id": "param45",
+            "nom": "Nombre de carte avis type Anxieux/Végétariens",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 4
+        },
+        {
+            "id": "param46",
+            "nom": "Nombre de carte avis type Épicuriens/Végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 4
+        },
+        {
+            "id": "param47",
+            "nom": "Nombre de carte avis type Épicuriens/Pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 4
+        },
+        {
+            "id": "param48",
+            "nom": "Nombre de carte avis type Pauvres/Végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 4
+        },
+        {
+            "id": "param49",
+            "nom": "Nombre de carte maximum dans la main des joueurs",
+            "number": 5,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param50",
+            "nom": "Cave à vin : Prix d'achat",
+            "number": 5,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param51",
+            "nom": "Cave à vin : dépense des anxieux",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param52",
+            "nom": "Cave à vin : dépense des épicuriens",
+            "number": 3,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param53",
+            "nom": "Cave à vin : dépense des pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param54",
+            "nom": "Cave à vin : dépense des végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param55",
+            "nom": "Alimentation bio : Prix d'achat",
+            "number": 5,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param56",
+            "nom": "Alimentation bio : dépense des anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param57",
+            "nom": "Alimentation bio : dépense des épicuriens",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param58",
+            "nom": "Alimentation bio : dépense des pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param59",
+            "nom": "Alimentation bio : dépense des végétariens",
+            "number": 3,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param60",
+            "nom": "Boulangerie : Prix d'achat",
+            "number": 4,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param61",
+            "nom": "Boulangerie : dépense des anxieux",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param62",
+            "nom": "Boulangerie : dépense des épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param63",
+            "nom": "Boulangerie : dépense des pauvres",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param64",
+            "nom": "Boulangerie : dépense des végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param65",
+            "nom": "Boucherie : Prix d'achat",
+            "number": 6,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param66",
+            "nom": "Boucherie : dépense des anxieux",
+            "number": 3,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param67",
+            "nom": "Boucherie : dépense des épicuriens",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param68",
+            "nom": "Boucherie : dépense des pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param69",
+            "nom": "Boucherie : dépense des végétariens",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param70",
+            "nom": "Fruits et légumes : Prix d'achat",
+            "number": 6,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param71",
+            "nom": "Fruits et légumes : dépense des anxieux",
+            "number": 3,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param72",
+            "nom": "Fruits et légumes : dépense des épicuriens",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param73",
+            "nom": "Fruits et légumes : dépense des pauvres",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param74",
+            "nom": "Fruits et légumes : dépense des végétariens",
+            "number": 3,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param75",
+            "nom": "Pharmacie : Prix d'achat",
+            "number": 8,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param76",
+            "nom": "Pharmacie : dépense des anxieux",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param77",
+            "nom": "Pharmacie : dépense des épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param78",
+            "nom": "Pharmacie : dépense des pauvres",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param79",
+            "nom": "Pharmacie : dépense des végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param80",
+            "nom": "Poissonnerie : Prix d'achat",
+            "number": 6,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param81",
+            "nom": "Poissonnerie : dépense des anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param82",
+            "nom": "Poissonnerie : dépense des épicuriens",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param83",
+            "nom": "Poissonnerie : dépense des pauvres",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param84",
+            "nom": "Poissonnerie : dépense des végétariens",
+            "number": 3,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param85",
+            "nom": "Fromagerie : Prix d'achat",
+            "number": 5,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param86",
+            "nom": "Fromagerie : dépense des anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param87",
+            "nom": "Fromagerie : dépense des épicuriens",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param88",
+            "nom": "Fromagerie : dépense des pauvres",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param89",
+            "nom": "Fromagerie : dépense des végétariens",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param90",
+            "nom": "Superette : Prix d'achat",
+            "number": 8,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param91",
+            "nom": "Superette : dépense des anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param92",
+            "nom": "Superette : dépense des épicuriens",
+            "number": 3,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param93",
+            "nom": "Superette : dépense des pauvres",
+            "number": 3,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param94",
+            "nom": "Superette : dépense des végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param95",
+            "nom": "Pâtisserie : Prix d'achat",
+            "number": 4,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param96",
+            "nom": "Pâtisserie : dépense des anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param97",
+            "nom": "Pâtisserie : dépense des épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param98",
+            "nom": "Pâtisserie : dépense des pauvres",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param99",
+            "nom": "Pâtisserie : dépense des végétariens",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param100",
+            "nom": "Joueur : Argent de départ",
+            "number": 10,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param101",
+            "nom": "Partie : Nombre de tour de jeu",
+            "number": 10,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param102",
+            "nom": "Multimédia : Prix d'achat",
+            "number": 5,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param103",
+            "nom": "Multimédia : dépense des anxieux",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param104",
+            "nom": "Multimédia : dépense des épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param105",
+            "nom": "Multimédia : dépense des pauvres",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param106",
+            "nom": "Multimédia : dépense des végétariens",
+            "number": 0,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param107",
+            "nom": "Droguerie : Prix d'achat",
+            "number": 5,
+            "numberMin": 0,
+            "numberMax": 20
+        },
+        {
+            "id": "param108",
+            "nom": "Droguerie : dépense des anxieux",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param109",
+            "nom": "Droguerie : dépense des épicuriens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param110",
+            "nom": "Droguerie : dépense des pauvres",
+            "number": 2,
+            "numberMin": 0,
+            "numberMax": 10
+        },
+        {
+            "id": "param111",
+            "nom": "Droguerie : dépense des végétariens",
+            "number": 1,
+            "numberMin": 0,
+            "numberMax": 10
+        }
+    ]
+}

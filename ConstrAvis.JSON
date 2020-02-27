@@ -1,0 +1,52 @@
+{
+    "Avis": [
+        {
+            "Nom":"Alerte graisse animale !",
+            "Effet":"Les additifs à base de graisse animale sont partout",
+            "Cible magasin":"Pâtisserie/Supérette",
+            "Cible client":"Anxieux/Végétariens"
+        },
+        {
+            "Nom":"Provenance inconnue",
+            "Effet":"On ne sait plus quelle viande on mange",
+            "Cible magasin":"Boucherie/Supérette",
+            "Cible client":"Anxieux/Epicuriens"
+        },
+        {
+            "Nom":"Le bio c'est trop tôt !",
+            "Effet":"Les produits bio sont trop tristes",
+            "Cible magasin":"Alimentation Bio/Fruits & Légumes",
+            "Cible client":"Anxieux/Epicuriens"
+        },
+        {
+            "Nom":"Les oeufs qui piques",
+            "Effet":"Les oeufs sont contaminés par des insecticides",
+            "Cible magasin":"Boulangerie/Pâtisserie",
+            "Cible client":"Anxieux/Végétariens"
+        },
+        {
+            "Nom":"Le cheval de mer",
+            "Effet":"Le poisson est nourri avec du cheval",
+            "Cible magasin":"Supérette/Poissonerie",
+            "Cible client":"Anxieux/Végétariens"
+        },
+        {
+            "Nom":"Les fruits fades",
+            "Effet":"Les fruits n'ont plus aucun goût",
+            "Cible magasin":"Fruit & Légumes/Supérette",
+            "Cible client":"Epicuriens/Végétariens"
+        },
+        {
+            "Nom":"Pénurie de raclette",
+            "Effet":"Le fromage est hors de prix",
+            "Cible magasin":"Alimentation Bio/Fromagerie",
+            "Cible client":"Pauvres/Végétariens"
+        },
+        {
+            "Nom":"Bonjour la villageoise",
+            "Effet":"Le bon vin est hors de prix",
+            "Cible magasin":"Alimentation Bio/Cave à vin",
+            "Cible client":"Epicuriens/Pauvres"
+        }
+    ]
+}

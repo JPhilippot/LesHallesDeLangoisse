@@ -1,0 +1,16 @@
+{
+    "Evenements": [
+        {
+            "Nom":"Voleur",
+            "Effet":"Retire 2 UM par magasin de la zone d'effet"
+        },
+        {
+            "Nom":"Fraude Fiscale",
+            "Effet":"Double les UM rapportés par chaque magasin de la zone d'effet"
+        },
+        {
+            "Nom":"DGCCRF",
+            "Effet":"Annule le bénéfice de la carte Fraude fiscale et en amende triple le montant des achats de chaque magasin."
+        }
+    ]
+}

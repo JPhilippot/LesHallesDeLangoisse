@@ -1,0 +1,192 @@
+{ 
+        "hommes": [
+            {
+                "nom":"Alain Sop"
+            },
+            {
+                "nom":"Bernard Tichaut"
+            },
+            {
+                "nom":"Brice Glace"
+            },
+            {
+                "nom":"Charles Ottofraize"
+            },
+            {
+                "nom":"Douglas O’Chocola"
+            },
+            {
+                "nom":"Élie Coptère"
+            },
+            {
+                "nom":"Firmin Dustriel"
+            },
+            {
+                "nom":"Guy Tar"
+            },
+            {
+                "nom":"Harry Cover"
+            },
+            {
+                "nom":"Ivan Desmuguets"
+            },
+            {
+                "nom":"Jacques Ouzi"
+            },
+            {
+                "nom":"Jean Bambois"
+            },
+            {
+                "nom":"Jean Philémon Pull"
+            },
+            {
+                "nom":"Jessica Net O’Frigo"
+            },
+            {
+                "nom":"Paul Ochon"
+            },
+            {
+                "nom":"Pit Za"
+            },
+            {
+                "nom":"Roméo Frigo"
+            },
+            {
+                "nom":"Serge Oin"
+            },
+            {
+                "nom":"Sim K.Mil"
+            },
+            {
+                "nom":"Tom De Savoie"
+            },
+            {
+                "nom":"Ali Mentation"
+            },
+            {
+                "nom":"Juda Nanasse"
+            },
+            {
+                "nom":"Jack Ett"
+            },
+            {
+                "nom":"Guy Ness La Bière"
+            },
+            {
+                "nom":"Gérard Ni-Homme Dujardin"
+            }
+            
+         ],
+        "femmes": [
+             {
+                "nom":"Lara Tatouille"
+             },
+             {
+                "nom":"Emma Yonnaise"
+             },
+             {
+                "nom":"Emmy Rabelle"
+             },
+             {
+                "nom":"Gina Bricot"
+             },
+             {
+                "nom":"Julienne de Légume"
+             },
+             {
+                "nom":"Kara Mélochocolat"
+             },
+             {
+                "nom":"Louise Sky"
+             },
+             {
+                "nom":"Marga Rhine"
+             },
+             {
+                "nom":"Marga Rita"
+             },
+             {
+                "nom":"Ode Javel"
+             },
+             {
+                "nom":"Rose Bif"
+             },
+             {
+                "nom":"Sarah Zin"
+             },
+             {
+                "nom":"Paula Roïd"
+             },
+             {
+                "nom":"Sarah Pelle"
+             },
+             {
+                "nom":"Sophie Sonsec"
+             },
+             {
+                "nom":"Jude Orange"
+             },
+             {
+                "nom":"Aimée Nemss"
+             },
+             {
+                "nom":"Aude Boudin"
+             },
+             {
+                "nom":"Beth Rave"
+             },
+             {
+                "nom":"Jessica Net O’Frigo"
+             },
+             {
+                "nom":"Eléonor Marolex"
+             },
+             {
+                "nom":"Samantha Lo"
+             },
+             {
+                "nom":"Aude Javel"
+             },
+             {
+                "nom":"Cléa Molette"
+             },
+             {
+                "nom":"Dolly Pran"
+             }
+             
+         ],
+         "Categories" : [
+             {
+                "Categorie":"Pauvres"
+             },
+             {
+                "Categorie":"Epicuriens"
+             },
+             {
+                "Categorie":"Anxieux"
+             },
+             {
+                "Categorie":"Vegetariens"
+             }
+
+             
+         ],
+         "EtatMental" : [
+             {
+                "Etat":"Paranoiaque"
+             },
+             {
+                "Etat":"Sociopathe"
+             },
+             {
+                "Etat":"Psychorigide"
+             },
+             {
+                "Etat":"Depressif"
+             },
+             {
+                "Etat":"Sain"
+             }
+         ]
+         
+}
