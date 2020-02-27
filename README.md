@@ -1,4 +1,4 @@
-# Les Halles De L'angoisse, by Corroye Sylvain, Beauget Denis, Besnier Aurélien, and Philippot Josua.
+# Les Halles De L'angoisse, by Courroye Sylvain, Beauget Denis, Besnier Aurélien, and Philippot Josua.
 
 This web project was made as a part of our 4th semester of computing science licence's evaluation. Although unfinished, the current status of this project is the result of four months of labor with no background knowledge of NodeJS, D3 and Javascript.
 This project didn't aim marketing purposes at the time we started it, and will never be. All the resources used belongs to their owners. As we created it for learning purposes, we do not authorize anyone to our code in commercial purposes.
